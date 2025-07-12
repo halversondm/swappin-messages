@@ -16,7 +16,7 @@ public class StartSwappin {
     String topic;
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public StartSwappin(Environment environment, KafkaTemplate<String, String> kafkaTemplate, @Value("swappin-messages.producer-topic") String topic) {
+    public StartSwappin(Environment environment, KafkaTemplate<String, String> kafkaTemplate, @Value("${swappin-messages.producer-topic}") String topic) {
         this.environment = environment;
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;
@@ -29,9 +29,9 @@ public class StartSwappin {
                 String message = objectMapper.writeValueAsString(messageSwap);
                 kafkaTemplate.send(topic, message).whenComplete((sendResult, ex) -> {
                     if (ex != null) {
-                        log.error("Error sending message: " + ex.getMessage());
+                        log.error("Error sending message: {}", ex.getMessage());
                     } else {
-                        log.info("Message sent successfully: " + sendResult.getProducerRecord().value());
+                        log.info("Message sent successfully: {}", sendResult.getProducerRecord().value());
                     }
                 });
             } catch (Exception e) {

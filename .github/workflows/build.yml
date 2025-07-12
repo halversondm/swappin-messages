@@ -18,3 +18,5 @@ jobs:
           distribution: 'temurin'
       - name: Build Code
         run: mvn -e --batch-mode clean install
+      - name: Build Docker images for all Dockerfiles
+        run: docker build . --tag "swappin-messages:latest"
