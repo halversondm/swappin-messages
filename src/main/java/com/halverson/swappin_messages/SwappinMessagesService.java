@@ -2,6 +2,8 @@ package com.halverson.swappin_messages;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.halverson.swappin_messages.dao.MessageStorageDao;
+import com.halverson.swappin_messages.entity.MessageStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -21,16 +23,20 @@ public class SwappinMessagesService {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
+    MessageStorageDao messageStorageDao;
+
     public SwappinMessagesService(KafkaTemplate<String, String> kafkaTemplate,
-                                  @Value("${swappin-messages.producer-topic}") String producerTopic) {
+                                  @Value("${swappin-messages.producer-topic}") String producerTopic, MessageStorageDao messageStorageDao) {
         this.kafkaTemplate = kafkaTemplate;
         this.producerTopic = producerTopic;
+        this.messageStorageDao = messageStorageDao;
     }
 
     @KafkaListener(topics = "${swappin-messages.consumer-topic}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeMessage(String message) {
         log.info("Received message: {}", message);
         log.info("Message length: {}", message.length());
+        messageStorageDao.save(new MessageStorage(message));
         try {
             Thread.sleep(1000);
             MessageSwap messageSwap = objectMapper.readValue(message, MessageSwap.class);

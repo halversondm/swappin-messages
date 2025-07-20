@@ -1,4 +1,16 @@
 services:
+  db:
+    image: 'bitnami/postgresql:15'
+    networks:
+      - app-tier
+    ports:
+      - "5433:5432"
+    volumes:
+      - "postgres_data:/bitnami/postgresql"
+    environment:
+      - POSTGRESQL_USERNAME=bn_swappin_messages
+      - POSTGRESQL_PASSWORD=bitnami
+      - POSTGRESQL_DATABASE=bitnami_swappin_messages
   kafka:
     image: 'bitnami/kafka:4.0'
     networks:
@@ -21,27 +33,37 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
   swappin-messages-one:
-    image: 'swappin-messages:latest'
+    image: halversondm/swappin-messages:latest
     networks:
       - app-tier
     ports:
       - "9000:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=one
+      - SPRING_PROFILES_ACTIVE=one,db
+      - POSTGRESQL_USERNAME=bn_swappin_messages
+      - POSTGRESQL_PASSWORD=bitnami
+      - POSTGRESQL_DATABASE=bitnami_swappin_messages
     depends_on:
       - kafka
+      - db
   swappin-messages-two:
-    image: 'swappin-messages:latest'
+    image: halversondm/swappin-messages:latest
     networks:
       - app-tier
     ports:
       - "9001:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=two
+      - SPRING_PROFILES_ACTIVE=two,db
+      - POSTGRESQL_USERNAME=bn_swappin_messages
+      - POSTGRESQL_PASSWORD=bitnami
+      - POSTGRESQL_DATABASE=bitnami_swappin_messages
     depends_on:
       - kafka
+      - db
 volumes:
   kafka_data:
+    driver: local
+  postgres_data:
     driver: local
 networks:
   app-tier:
