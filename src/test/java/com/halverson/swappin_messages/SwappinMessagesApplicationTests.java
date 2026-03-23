@@ -2,14 +2,14 @@ package com.halverson.swappin_messages;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 
 @SpringBootTest(args = {"--spring.profiles.active=test"})
-@ImportTestcontainers
+@Testcontainers
 class SwappinMessagesApplicationTests {
 
     @Container
