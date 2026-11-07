@@ -8,9 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
@@ -18,5 +22,17 @@ jobs:
           distribution: 'temurin'
       - name: Build Code
         run: mvn -e --batch-mode clean install
+      - name: Cache SonarCloud packages
+        if: env.SONAR_TOKEN != ''
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: SonarCloud Analysis
+        if: env.SONAR_TOKEN != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -e --batch-mode org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
       - name: Build Docker images for all Dockerfiles
         run: docker build . --tag "swappin-messages:latest"
